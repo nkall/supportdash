@@ -13,21 +13,20 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="#">Heroku Support</a>
         </div>
-        <!--
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="#">Tickets</a></li>
-            <li><a href="#">My Performance</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Inbox (0)</a></li>
-            <li><a href="#">Stars (0)</a></li>
-            <li><a href="#">Subscriptions (0)</a></li>
-          </ul>
-        </div>
-        -->
       </div>
     </nav>
+    <br><br><br>
+  <div class="container" role="main">
+  <h1>{{user_email}}</h1>
+
+  {% if survey_list %}
+    {{ survey_list }}
+  {% else %}
+    No
+  {% endif %}
+
+DOn't drop
+</div>
 
 <script src="{% static "jquery-1.11.3.min.js" %}"></script>
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
