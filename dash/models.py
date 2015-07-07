@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 from django.db import models
 import uuid
 
-class Admins(models.Model):
+class Admin(models.Model):
     id = models.UUIDField(primary_key=True)
     user_id = models.UUIDField()
     created_at = models.DateTimeField()
@@ -23,7 +23,7 @@ class Admins(models.Model):
         db_table = 'admins'
 
 
-class Clients(models.Model):
+class Client(models.Model):
     id = models.UUIDField(primary_key=True)
     name = models.TextField(blank=True, null=True)
     token = models.TextField(blank=True, null=True)
@@ -36,7 +36,7 @@ class Clients(models.Model):
         db_table = 'clients'
 
 
-class Culprits(models.Model):
+class Culprit(models.Model):
     id = models.UUIDField(primary_key=True)
     ticket_id = models.IntegerField(blank=True, null=True)
     tag_id = models.UUIDField(blank=True, null=True)
@@ -60,7 +60,7 @@ class DjangoMigrations(models.Model):
         db_table = 'django_migrations'
 
 
-class Events(models.Model):
+class Event(models.Model):
     id = models.UUIDField(primary_key=True)
     type = models.TextField()
     body = models.TextField(blank=True, null=True)
@@ -81,7 +81,7 @@ class Events(models.Model):
         db_table = 'events'
 
 
-class InboundEmails(models.Model):
+class InboundEmail(models.Model):
     id = models.UUIDField(primary_key=True)
     payload = models.TextField()
     created_at = models.DateTimeField()
@@ -93,7 +93,7 @@ class InboundEmails(models.Model):
         db_table = 'inbound_emails'
 
 
-class SavedSearches(models.Model):
+class SavedSearch(models.Model):
     id = models.UUIDField(primary_key=True)
     user_id = models.UUIDField()
     name = models.TextField()
@@ -106,7 +106,7 @@ class SavedSearches(models.Model):
         db_table = 'saved_searches'
 
 
-class SchemaMigrations(models.Model):
+class SchemaMigration(models.Model):
     filename = models.TextField(primary_key=True)
 
     class Meta:
@@ -114,7 +114,7 @@ class SchemaMigrations(models.Model):
         db_table = 'schema_migrations'
 
 
-class Shares(models.Model):
+class Share(models.Model):
     id = models.UUIDField(primary_key=True)
     user_id = models.UUIDField(blank=True, null=True)
     ticket_id = models.IntegerField(blank=True, null=True)
@@ -126,7 +126,7 @@ class Shares(models.Model):
         db_table = 'shares'
 
 
-class Stars(models.Model):
+class Star(models.Model):
     id = models.UUIDField(primary_key=True)
     user_id = models.UUIDField(blank=True, null=True)
     ticket_id = models.IntegerField(blank=True, null=True)
@@ -138,7 +138,7 @@ class Stars(models.Model):
         managed = False
         db_table = 'stars'
 
-class Tags(models.Model):
+class Tag(models.Model):
     id = models.UUIDField(primary_key=True)
     name = models.TextField()
     slug = models.TextField()
@@ -156,10 +156,10 @@ class Tags(models.Model):
         db_table = 'tags'
 
 
-class Subscriptions(models.Model):
+class Subscription(models.Model):
     id = models.UUIDField(primary_key=True)
     user_id = models.UUIDField(blank=True, null=True)
-    tag_id = models.ForeignKey(Tags, blank=True, null=True)
+    tag_id = models.ForeignKey(Tag, blank=True, null=True)
     notify = models.NullBooleanField()
     client_id = models.UUIDField(blank=True, null=True)
     created_at = models.DateTimeField()
@@ -170,7 +170,7 @@ class Subscriptions(models.Model):
         db_table = 'subscriptions'
 
 
-class Surveys(models.Model):
+class Survey(models.Model):
     id = models.UUIDField(primary_key=True)
     ticket_id = models.IntegerField(unique=True, blank=True, null=True)
     support_score = models.IntegerField(blank=True, null=True)
@@ -185,7 +185,7 @@ class Surveys(models.Model):
         managed = False
         db_table = 'surveys'
 
-class Tickets(models.Model):
+class Ticket(models.Model):
     id = models.FloatField(primary_key=True)
     state = models.TextField()
     app_name = models.TextField()
@@ -213,9 +213,9 @@ class Tickets(models.Model):
         managed = False
         db_table = 'tickets'
 
-class TagsTickets(models.Model):
-    tag_id = models.ForeignKey(Tags)
-    ticket_id = models.ForeignKey(Tickets)
+class TagsTicket(models.Model):
+    tag_id = models.ForeignKey(Tag)
+    ticket_id = models.ForeignKey(Ticket)
 
     class Meta:
         managed = False
@@ -223,7 +223,7 @@ class TagsTickets(models.Model):
         unique_together = (('tag_id', 'ticket_id'),)
 
 
-class Webhooks(models.Model):
+class Webhook(models.Model):
     id = models.UUIDField(primary_key=True)
     uri = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField()
