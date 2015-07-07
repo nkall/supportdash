@@ -13,19 +13,62 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="#">Heroku Support</a>
         </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+          {% if userInfo %}
+            <li><a href="#">{{ userInfo.full_name }}</a></li>
+            <li><a href="#">{{ userInfo.email }}</a></li>
+          {% else %}
+            <li><a href="#">{{ userInfo.userId }}</a></li>
+          {% endif %}
+
+          </ul>
+        </div>
       </div>
     </nav>
     <br><br><br>
   <div class="container" role="main">
-  <h1>{{user_email}}</h1>
+    <h1> My Performance </h1>
+    {% if userInfo %}
+      <h1>
+    {% else %}
+      <h1>{{ userId }}
+    {% endif %}
 
-  {% if survey_list %}
-    {{ survey_list }}
+
+
+  <h2>Surveys Received</h2>
+  {% if surveys %}
+  <table class="table table-condensed">
+    <thead>
+    <tr>
+      <th>Ticket</th>
+      <th>User</th>
+      <th>Positive?</th>
+      <th>Comments</th>
+    </tr>
+    </thead>
+      {% for survey in surveys %}
+      <tbody>
+      <tr>
+        <td>{{survey.ticket_id}}</td>
+        <td>{{survey.client_id}}</td>
+        {% if survey.support_score %}
+          <td style="color:#00ff00">Yes</td>
+        {% else %}
+          <td style="color:#ff0000">No</td>
+        {% endif %}
+        </td>
+        <td></td>
+      </tr>
+      </tbody>
+      {% endfor %}
   {% else %}
-    No
+    No surveys to show.
   {% endif %}
 
-DOn't drop
+    </table>
 </div>
 
 <script src="{% static "jquery-1.11.3.min.js" %}"></script>
