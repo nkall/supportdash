@@ -36,10 +36,22 @@
       <h1>{{ userId }}
     {% endif %}
 
-
+    <!-- Charts -->
+    <div class="row">
+      <div class="col-sm-4">
+        <h3>Survey Satisfaction:</h3> {{surveyInfo.surveyPercent}}%
+        <figure>
+          {{surveyInfo.surveyChart|safe}}
+        </figure>
+      </div>
+      <div class="col-sm-4">
+      </div>
+      <div class="col-sm-4">
+      </div>
+    </div>
 
   <h2>Surveys Received</h2>
-  {% if surveys %}
+  {% if surveyInfo.surveys %}
   <table class="table table-condensed">
     <thead>
     <tr>
@@ -49,7 +61,7 @@
       <th>Comments</th>
     </tr>
     </thead>
-      {% for survey in surveys %}
+      {% for survey in surveyInfo.surveys %}
       <tbody>
       <tr>
         <td>{{survey.ticket_id}}</td>
@@ -60,7 +72,11 @@
           <td style="color:#ff0000">No</td>
         {% endif %}
         </td>
-        <td></td>
+        {% if survey.comments %}
+        <td>{{ survey.comments }}</td>
+        {% else %}
+        <td>None</td>
+        {% endif %}
       </tr>
       </tbody>
       {% endfor %}
