@@ -11,25 +11,13 @@
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="/dash/allusers">Heroku Support</a>
-        </div>
-
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-          {% if userInfo %}
-            <li><a href="#">{{ userInfo.full_name }}</a></li>
-            <li><a href="#">{{ userInfo.email }}</a></li>
-          {% else %}
-            <li><a href="#">{{ userInfo.userId }}</a></li>
-          {% endif %}
-
-          </ul>
+          <a class="navbar-brand" href="#">Heroku Support</a>
         </div>
       </div>
     </nav>
     <br><br><br>
   <div class="container" role="main">
-    <h1>My Performance</h1>
+    <h1>Team Performance</h1>
     {% if userInfo %}
       <h1>
     {% else %}
@@ -46,7 +34,7 @@
               {{ticketsInfo.chart|safe}}
             </figure>
           {% else %}
-            Too few recent tickets closed.
+            No recent tickets closed.
           {% endif %}
       </div>
       <div class="col-sm-4">
@@ -57,7 +45,7 @@
               {{commentsInfo.chart|safe}}
             </figure>
           {% else %}
-            Too few recent comments.
+            No recent comments.
           {% endif %}
       </div>
       <div class="col-sm-4">
@@ -68,7 +56,7 @@
               {{surveyInfo.chart|safe}}
             </figure>
           {% else %}
-            Too few recent survey responses.
+            No recent survey responses.
           {% endif %}
       </div>
     </div>
@@ -108,34 +96,28 @@
     No surveys to show.
   {% endif %}
   </table>
-<br>
-  <!-- Comments List -->
-  <h2>Comments Posted</h2>
-  {% if commentsInfo.objList %}
+  <br>
+  <h2>Top Closers</h2>
+  {% if ticketsInfo.topClosers %}
   <table class="table table-condensed">
     <thead>
     <tr>
-      <th>Ticket</th>
-      <th>Comment</th>
+      <th>User</th>
+      <th>Tickets Closed</th>
     </tr>
     </thead>
-      {% for comment in commentsInfo.objList %}
+      {% for closer in ticketsInfo.topClosers %}
       <tbody>
       <tr>
-        {% if comment.ticket_id %}
-          <td>{{comment.ticket_id}}</td>
-        {% else %}
-          <td>--</td>
-        <td>{{comment.body}}</td>
-        {% endif %}
+        {% for element in closer %}
+          <td>{{element|safe}}</td>
+        {% endfor %}
       </tr>
       </tbody>
       {% endfor %}
   {% else %}
     No comments to show.
   {% endif %}
-
-
 </div>
 <br><br>
 

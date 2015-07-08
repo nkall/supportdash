@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from .models import *
-from django.views.generic.list import ListView
 
-import json
 import pygal
 from pygal.style import *
 from datetime import datetime, timedelta
+
+import uuid
 
 # Create your views here.
 def index(request):
@@ -22,9 +22,19 @@ def userDash(request, userId):
 	return render(request, 'dash/user/index.html', {'userId':userId, 'userInfo':userInfo, 
 	              'ticketsInfo':ticketsInfo, 'commentsInfo':commentsInfo, 'surveyInfo':surveyInfo})
 
+def allUsers(request):
+	ticketsInfo = TicketsInfo(None)
+	commentsInfo = CommentsInfo(None)
+	surveyInfo = SurveyInfo(None)
+	return render(request, 'dash/allusers/index.html', {'ticketsInfo':ticketsInfo,
+	              'commentsInfo':commentsInfo, 'surveyInfo':surveyInfo})
+
+
 '''
   Abstract class for the different objects to be passed to the view: tickets answered, comments
-  posted, and survey responses
+  posted, and survey responses.
+
+  If userId is "None", all users will be queried
 '''
 class InfoObj:
 	def __init__(self, userId):
@@ -45,12 +55,32 @@ class TicketsInfo(InfoObj):
 			return True
 		return False
 
+	# Returns tuples with the uuid in html link, then the count
+	def getTopClosers(self):
+		agentClosedCount = {}
+		for closer in self.objList:
+			closerId = closer.actor_id
+			closedCount = agentClosedCount.get(closerId, 0) + 1
+			agentClosedCount[closerId] = closedCount
+		sortedDictKeys = sorted(agentClosedCount, key=agentClosedCount.get)
+		userCountTuples = []
+		for key in sortedDictKeys[::-1]:
+			userCountTuples.append(('<a href="/dash/user/' + str(key) + '">' + str(key) + '</a>', agentClosedCount[key]))
+		if len(userCountTuples) > 25:
+			userCountTuples = userCountTuples[:25]
+		return userCountTuples
+
 	def __init__(self, userId):
 		self.userId = userId
-		allChanges = Event.objects.filter(actor_id=self.userId, type='Change').order_by('-created_at')
+		if self.userId:
+			allChanges = Event.objects.filter(actor_id=self.userId, type='Change').order_by('-created_at')
+		else:
+			allChanges = Event.objects.filter(type='Change').order_by('-created_at')
 		self.objList = [chg for chg in allChanges if self.changeIsClose(chg.change)]
 		self.chart = self.genChart()
 		self.count = len(self.objList)
+		if not self.userId:
+			self.topClosers = self.getTopClosers()
 
 class CommentsInfo(InfoObj):
 	def genChart(self):
@@ -59,7 +89,10 @@ class CommentsInfo(InfoObj):
 
 	def __init__(self, userId):
 		self.userId = userId
-		self.objList = Event.objects.filter(actor_id=self.userId, type='Comment').order_by('-created_at')
+		if self.userId:
+			self.objList = Event.objects.filter(actor_id=self.userId, type='Comment').order_by('-created_at')
+		else:
+			self.objList = Event.objects.filter(type='Comment').order_by('-created_at')
 		self.chart = self.genChart()
 		self.count = len(self.objList)
 
@@ -70,17 +103,27 @@ class SurveyInfo(InfoObj):
 
 	def __init__(self, userId):
 		self.userId = userId
-		self.objList = Survey.objects.filter(actor_id=self.userId).order_by('-created_at')
+		if self.userId:
+			self.objList = Survey.objects.filter(actor_id=self.userId).order_by('-created_at')
+		else:
+			self.objList = Survey.objects.order_by('-created_at')
 		self.chart = self.genChart()
-		self.count = round(100 * (sum([sur.support_score for sur in self.objList]) / len(self.objList)), 1)
+		if self.objList:
+			self.count = round(100 * (sum([sur.support_score for sur in self.objList]) / len(self.objList)), 1)
+		else:
+			self.count = 0
 
 
 class UserDashGenerator:
 	def getUserInfo(self):
+		print(self.uid)
 		uinfo = Event.objects.raw("SELECT id, user_cache \
 		                           FROM events \
-		                           WHERE user_cache->>'uuid'= %s", [self.uid])[0];
-		return uinfo.user_cache
+		                           WHERE user_cache->>'uuid'= %s", [self.uid])
+		if len(list(uinfo)) > 0:
+			return uinfo[0].user_cache
+		else:
+			return None
 
 	def __init__(self, userId):
 		self.uid = userId
@@ -118,13 +161,14 @@ class Chart:
 	def genRollingLine(self, mainLine):
 		rollingLine = []
 		# First point in rolling avg is always the same as the main line
-		oldAvg = mainLine[0]['value']
-		for point in mainLine:
-			rollingVal = self.calcRollingAvg(point['value'], oldAvg)
-			rollingLine.append({'value': rollingVal, 
-				                'label': point['label']})
-			oldAvg = rollingVal
-		return ('Rolling Average', rollingLine)
+		if len(mainLine) > 0:
+			oldAvg = mainLine[0]['value']
+			for point in mainLine:
+				rollingVal = self.calcRollingAvg(point['value'], oldAvg)
+				rollingLine.append({'value': rollingVal, 
+					                'label': point['label']})
+				oldAvg = rollingVal
+		return ('Rolling Avg', rollingLine)
 
 	def calcRollingAvg(self, newVal, oldAvg):
 		decayCoefficient = 0.2
@@ -149,7 +193,7 @@ class TicketsChart(Chart):
 			label = str(date) + ": " + str(ticketCount) + " comments"
 			line.append({'value': ticketCount,
 			             'label': label})
-		return ('Comments Posted', line)
+		return ('Tickets Closed', line)
 
 	# Populates the self.commentDateCount dict with counts for each date
 	def populateDateCount(self):
@@ -198,7 +242,7 @@ class CommentsChart(Chart):
 			label = str(date) + ": " + str(commentCount) + " comments"
 			line.append({'value': commentCount,
 			             'label': label})
-		return ('Comments Posted', line)
+		return ('Comments', line)
 
 	# Populates the self.commentDateCount dict with counts for each date
 	def populateDateCount(self):
@@ -239,7 +283,7 @@ class SurveyChart(Chart):
 	def genMainLine(self):
 		line = []
 		for survey in reversed(self.surveys):
-			label = str(survey.ticket_id) + ': ' + survey.comments
+			label = survey.comments
 			line.append({'value': survey.support_score,
 			             'label': label})
 		return ('Survey Responses', line)
