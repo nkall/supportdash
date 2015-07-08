@@ -39,19 +39,36 @@
     <!-- Charts -->
     <div class="row">
       <div class="col-sm-4">
-        <h3>Survey Satisfaction:</h3> {{surveyInfo.surveyPercent}}%
-        <figure>
-          {{surveyInfo.surveyChart|safe}}
-        </figure>
+        <h3>Tickets Closed:</h3>
+        {% if ticketsInfo.count %}
+            {{ticketsInfo.count}}
+          {% else %}
+            No recent tickets closed.
+          {% endif %}
       </div>
       <div class="col-sm-4">
+        <h3>Comments Posted:</h3> 
+          {% if commentsInfo.count %}
+            {{commentsInfo.count}}
+          {% else %}
+            No recent comments.
+          {% endif %}
       </div>
       <div class="col-sm-4">
+        <h3>Satisfaction:</h3>
+        {% if surveyInfo.count %}
+            {{surveyInfo.count}}
+            <figure>
+              {{surveyInfo.chart|safe}}
+            </figure>
+          {% else %}
+            No recent survey responses.
+          {% endif %}
       </div>
     </div>
 
   <h2>Surveys Received</h2>
-  {% if surveyInfo.surveys %}
+  {% if surveyInfo.objList %}
   <table class="table table-condensed">
     <thead>
     <tr>
@@ -61,7 +78,7 @@
       <th>Comments</th>
     </tr>
     </thead>
-      {% for survey in surveyInfo.surveys %}
+      {% for survey in surveyInfo.objList %}
       <tbody>
       <tr>
         <td>{{survey.ticket_id}}</td>
@@ -86,6 +103,7 @@
 
     </table>
 </div>
+<br><br>
 
 <script src="{% static "jquery-1.11.3.min.js" %}"></script>
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
