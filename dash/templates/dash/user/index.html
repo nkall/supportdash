@@ -42,6 +42,9 @@
         <h3>Tickets Closed:</h3>
         {% if ticketsInfo.count %}
             {{ticketsInfo.count}}
+            <figure>
+              {{ticketsInfo.chart|safe}}
+            </figure>
           {% else %}
             No recent tickets closed.
           {% endif %}
@@ -50,6 +53,9 @@
         <h3>Comments Posted:</h3> 
           {% if commentsInfo.count %}
             {{commentsInfo.count}}
+            <figure>
+              {{commentsInfo.chart|safe}}
+            </figure>
           {% else %}
             No recent comments.
           {% endif %}
@@ -67,6 +73,7 @@
       </div>
     </div>
 
+  <!-- Survey List -->
   <h2>Surveys Received</h2>
   {% if surveyInfo.objList %}
   <table class="table table-condensed">
@@ -100,8 +107,31 @@
   {% else %}
     No surveys to show.
   {% endif %}
+  </table>
+<br>
+  <!-- Comments List -->
+  <h2>Comments Posted</h2>
+  {% if commentsInfo.objList %}
+  <table class="table table-condensed">
+    <thead>
+    <tr>
+      <th>Ticket</th>
+      <th>Comment</th>
+    </tr>
+    </thead>
+      {% for comment in commentsInfo.objList %}
+      <tbody>
+      <tr>
+        <td>{{comment.ticket_id}}</td>
+        <td>{{comment.body}}</td>
+      </tr>
+      </tbody>
+      {% endfor %}
+  {% else %}
+    No comments to show.
+  {% endif %}
 
-    </table>
+
 </div>
 <br><br>
 
